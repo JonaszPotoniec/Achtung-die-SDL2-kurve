@@ -6,14 +6,15 @@
 bool init();
 void input();
 
-const int resolutionX = 1280;
-const int resolutionY = 720;
+const int resolutionX = 800;
+const int resolutionY = 600;
 int mouseX, mouseY;
 SDL_Window* window = NULL;
 SDL_Renderer* windowRenderer = NULL;
 SDL_Event evnt;
 bool run = true;
-
+int ticks;
+int *deltaTicks = new int;
 
 int main(){
   run = init();
@@ -21,11 +22,22 @@ int main(){
   SDL_SetRenderDrawColor( windowRenderer, 0, 0, 0, 0xFF );
   SDL_RenderClear( windowRenderer );
 
+  player playerObject;
+  playerObject.setColor(255, 255, 255);
+
   while(run){
+    deltaTicks[0] = ticks - SDL_GetTicks();
+    ticks = SDL_GetTicks();
+
     input();
-    SDL_SetRenderDrawColor( windowRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-    SDL_RenderDrawPoint( windowRenderer, mouseX, mouseY );
-    printf("%i  %i\n", mouseX, mouseY);
+    if(evnt.type == SDL_KEYDOWN){
+      playerObject.input(&evnt, deltaTicks);
+    }
+
+    playerObject.move(deltaTicks);
+
+    playerObject.draw(windowRenderer);
+
     SDL_RenderPresent( windowRenderer );
   }
 }
@@ -52,7 +64,7 @@ bool init(){
 }
 
 void input(){
-  SDL_GetMouseState(&mouseX, &mouseY);
+  //SDL_GetMouseState(&mouseX, &mouseY);
   while(SDL_PollEvent(&evnt)){
     if(evnt.type == SDL_QUIT)
       run = false;
